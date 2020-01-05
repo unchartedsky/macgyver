@@ -7,7 +7,7 @@ ENV KUBERNETES_VERSION 1.17.0
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
-  runDeps='curl ca-certificates procps netcat wget telnet mysql-client redis-tools vim-tiny aws-shell groff s3cmd s3curl dnsutils sipcalc'; \
+  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc'; \
   buildDeps=''; \
   apt-get update && apt-get install -y $runDeps $buildDeps --no-install-recommends; \
   rm -rf /var/lib/apt/lists/*; \
@@ -29,6 +29,11 @@ RUN /bin/ln -s /usr/bin/vi /usr/bin/vim
 RUN curl --silent -Lo slackcat https://github.com/bcicen/slackcat/releases/download/v1.6/slackcat-1.6-$(uname -s)-amd64 \
 	&& chmod +x ./slackcat \
   && mv slackcat /usr/local/bin/
+
+RUN curl --silent -LO https://github.com/s3tools/s3cmd/releases/download/v2.0.2/s3cmd-2.0.2.tar.gz \
+  && tar xvfz s3cmd-2.0.2.tar.gz \
+  && mv s3cmd-2.0.2/s3cmd /usr/local/bin/ \
+  && rm -rf s3cmd-2.0.2 && rm s3cmd-2.0.2.tar.gz
 
 RUN curl --silent -Lo websocketd.deb https://github.com/joewalnes/websocketd/releases/download/v0.3.0/websocketd-0.3.0_amd64.deb \
 	&& dpkg -i websocketd.deb \

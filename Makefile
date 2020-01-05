@@ -1,6 +1,6 @@
 TAG=latest
 BIN=macgyver
-IMAGE=unchartedsky/$(BIN)
+IMAGE=docker.pkg.github.com/unchartedsky/macgyver/macgyver
 
 image:
 	docker build -t $(IMAGE):$(TAG) .
