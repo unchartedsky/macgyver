@@ -4,6 +4,8 @@ FROM python:3
 RUN cat /usr/share/zoneinfo/Asia/Seoul > /etc/localtime
 
 ENV KUBERNETES_VERSION 1.17.0
+ENV S3CMD_VERSION 2.0.2
+ENV SLACKCAT_VERSION 1.6
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
@@ -26,14 +28,14 @@ RUN curl --silent -Lo jq https://github.com/stedolan/jq/releases/download/jq-1.6
 # Create a symbolic link for a user's convenience
 RUN /bin/ln -s /usr/bin/vi /usr/bin/vim
 
-RUN curl --silent -Lo slackcat https://github.com/bcicen/slackcat/releases/download/v1.6/slackcat-1.6-$(uname -s)-amd64 \
+RUN curl --silent -Lo slackcat https://github.com/bcicen/slackcat/releases/download/v${SLACKCAT_VERSION}/slackcat-${SLACKCAT_VERSION}-$(uname -s)-amd64 \
 	&& chmod +x ./slackcat \
   && mv slackcat /usr/local/bin/
 
-RUN curl --silent -LO https://github.com/s3tools/s3cmd/releases/download/v2.0.2/s3cmd-2.0.2.tar.gz \
-  && tar xvfz s3cmd-2.0.2.tar.gz \
-  && mv s3cmd-2.0.2/s3cmd /usr/local/bin/ \
-  && rm -rf s3cmd-2.0.2 && rm s3cmd-2.0.2.tar.gz
+RUN curl --silent -LO https://github.com/s3tools/s3cmd/releases/download/v${S3CMD_VERSION}/s3cmd-${S3CMD_VERSION}.tar.gz \
+  && tar xvfz s3cmd-${S3CMD_VERSION}.tar.gz \
+  && mv s3cmd-${S3CMD_VERSION}/s3cmd /usr/local/bin/ \
+  && rm -rf s3cmd-${S3CMD_VERSION} && rm s3cmd-${S3CMD_VERSION}.tar.gz
 
 RUN curl --silent -Lo websocketd.deb https://github.com/joewalnes/websocketd/releases/download/v0.3.0/websocketd-0.3.0_amd64.deb \
 	&& dpkg -i websocketd.deb \
