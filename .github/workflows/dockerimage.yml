@@ -12,8 +12,8 @@ jobs:
       with:
         name: unchartedsky/macgyver/macgyver
         registry: docker.pkg.github.com
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
         dockerfile: Dockerfile
         buildoptions: "--compress --force-rm"
         tag_names: true
-        username: ${{ secrets.GITHUB_TOKEN }}
-        password: ${{ github.actor }}
