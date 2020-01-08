@@ -1,4 +1,4 @@
-![](https://github.com/unchartedsky/macgyver/workflows/.github/workflows/dockerimage.yml/badge.svg)
+![](https://github.com/unchartedsky/macgyver/workflows/Dockerize/badge.svg)
 [![Docker Automated build](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg)](https://hub.docker.com/r/unchartedsky/macgyver/)
 
 # macgyver
