@@ -7,13 +7,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Publish to Registry
-      uses: elgohr/Publish-Docker-Github-Action@master
+    - uses: azure/docker-login@v1
       with:
-        name: unchartedsky/macgyver/macgyver
-        registry: docker.pkg.github.com
+        login-server: docker.pkg.github.com
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-        dockerfile: Dockerfile
-        buildoptions: "--compress --force-rm"
-        tag_names: true
+    - name: Publish to Registry
+      run: |
+        git_hash=$(git rev-parse --short "$GITHUB_SHA")
+
+        docker build -t docker.pkg.github.com/unchartedsky/macgyver/macgyver:${git_hash} .
+        docker tag docker.pkg.github.com/unchartedsky/macgyver/macgyver:${git_hash} docker.pkg.github.com/unchartedsky/macgyver/macgyver:latest
+
+        docker push docker.pkg.github.com/unchartedsky/macgyver/macgyver:${git_hash}
+        docker push docker.pkg.github.com/unchartedsky/macgyver/macgyver:latest
