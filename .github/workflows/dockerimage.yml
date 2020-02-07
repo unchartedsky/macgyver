@@ -20,10 +20,5 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish to Registry
       run: |
-        git_hash=$(git rev-parse --short "$GITHUB_SHA")
-
-        docker build -t docker.pkg.github.com/unchartedsky/macgyver/macgyver:${git_hash} .
-        docker tag docker.pkg.github.com/unchartedsky/macgyver/macgyver:${git_hash} docker.pkg.github.com/unchartedsky/macgyver/macgyver:latest
-
-        docker push docker.pkg.github.com/unchartedsky/macgyver/macgyver:${git_hash}
-        docker push docker.pkg.github.com/unchartedsky/macgyver/macgyver:latest
+        make image
+        make deploy
