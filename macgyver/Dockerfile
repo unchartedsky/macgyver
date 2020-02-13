@@ -38,6 +38,10 @@ RUN S3CMD_CURRENT_VERSION=`curl --silent -fs https://api.github.com/repos/s3tool
     && ln -s $(find /opt/ -name s3cmd) /usr/local/bin/s3cmd \
     && ls /usr/local/bin/s3cmd
 
+RUN curl --silent -LO https://dl.min.io/client/mc/release/linux-amd64/mc \
+  && chmod +x mc \
+  && mv mc /usr/local/bin/
+
 RUN curl --silent -Lo websocketd.deb https://github.com/joewalnes/websocketd/releases/download/v0.3.0/websocketd-0.3.0_amd64.deb \
 	&& dpkg -i websocketd.deb \
 	&& rm websocketd.deb
