@@ -1,3 +1,4 @@
 raven-bash
 awscli
 requests
+s4cmd
