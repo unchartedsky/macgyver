@@ -4,17 +4,16 @@ FROM python:3
 RUN cat /usr/share/zoneinfo/Asia/Seoul > /etc/localtime
 
 ENV KUBERNETES_VERSION 1.17.0
-ENV S3CMD_VERSION 2.0.2
 ENV SLACKCAT_VERSION 1.6
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
-  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc'; \
+  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc python-dateutil python-magic'; \
   buildDeps=''; \
   apt-get update && apt-get install -y $runDeps $buildDeps --no-install-recommends; \
   rm -rf /var/lib/apt/lists/*; \
   \
-  curl -LO https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl; \
+  curl --silent -LO https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl; \
   chmod +x ./kubectl; \
   mv ./kubectl /usr/local/bin/kubectl; \
   \
@@ -32,10 +31,12 @@ RUN curl --silent -Lo slackcat https://github.com/bcicen/slackcat/releases/downl
 	&& chmod +x ./slackcat \
   && mv slackcat /usr/local/bin/
 
-RUN curl --silent -LO https://github.com/s3tools/s3cmd/releases/download/v${S3CMD_VERSION}/s3cmd-${S3CMD_VERSION}.tar.gz \
-  && tar xvfz s3cmd-${S3CMD_VERSION}.tar.gz \
-  && mv s3cmd-${S3CMD_VERSION}/s3cmd /usr/local/bin/ \
-  && rm -rf s3cmd-${S3CMD_VERSION} && rm s3cmd-${S3CMD_VERSION}.tar.gz
+RUN S3CMD_CURRENT_VERSION=`curl --silent -fs https://api.github.com/repos/s3tools/s3cmd/releases/latest | grep tag_name | sed -E 's/.*"v?([0-9\.]+).*/\1/g'` \
+    && mkdir -p /opt \
+    && wget --quiet https://github.com/s3tools/s3cmd/releases/download/v${S3CMD_CURRENT_VERSION}/s3cmd-${S3CMD_CURRENT_VERSION}.zip \
+    && unzip s3cmd-${S3CMD_CURRENT_VERSION}.zip -d /opt/ \
+    && ln -s $(find /opt/ -name s3cmd) /usr/local/bin/s3cmd \
+    && ls /usr/local/bin/s3cmd
 
 RUN curl --silent -Lo websocketd.deb https://github.com/joewalnes/websocketd/releases/download/v0.3.0/websocketd-0.3.0_amd64.deb \
 	&& dpkg -i websocketd.deb \
