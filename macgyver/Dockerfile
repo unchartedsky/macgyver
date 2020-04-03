@@ -46,12 +46,21 @@ RUN curl --silent -Lo websocketd.deb https://github.com/joewalnes/websocketd/rel
 	&& dpkg -i websocketd.deb \
 	&& rm websocketd.deb
 
-WORKDIR /
-
-COPY requirements.txt /
-
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+
+RUN useradd --user-group --system --create-home --no-log-init --uid 1000 --shell /bin/bash app
+
+COPY requirements.txt /home/app/
+RUN chown -R app /home/app
+
+USER app
+WORKDIR /home/app
+
+ENV PATH="/home/app/.local/bin:${PATH}"
+
+COPY requirements.txt /home/app/
+
+RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Sentry.io
 ENV SENTRY_DSN ""
