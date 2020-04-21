@@ -51,7 +51,7 @@ RUN pip install --upgrade pip
 RUN useradd --user-group --system --create-home --no-log-init --uid 1000 --shell /bin/bash app
 
 COPY requirements.txt /home/app/
-RUN chown -R app /home/app
+RUN chown -R app /home/app/
 
 USER app
 WORKDIR /home/app
