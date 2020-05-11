@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-IMAGES = $(shell find * -type f -name 'Dockerfile' -not -path "." | xargs dirname)
+IMAGES = $(shell find * -type f -name 'Dockerfile' -not -path "." | xargs -I {} dirname {})
 GIT_COMMIT_ID=$(shell git rev-parse --short HEAD)
 export GIT_COMMIT_ID
 GIT_BRANCH=$(shell git describe --abbrev=1 --tags --always)

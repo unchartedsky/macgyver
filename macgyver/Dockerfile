@@ -3,7 +3,7 @@ FROM python:3
 # Set the timezone to KST
 RUN cat /usr/share/zoneinfo/Asia/Seoul > /etc/localtime
 
-ENV KUBERNETES_VERSION 1.17.0
+ENV KUBERNETES_VERSION 1.18.2
 ENV SLACKCAT_VERSION 1.6
 
 RUN set -ex; \
