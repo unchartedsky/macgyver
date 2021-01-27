@@ -28,7 +28,8 @@ RUN curl --silent -Lo jq https://github.com/stedolan/jq/releases/download/jq-1.6
 RUN /bin/ln -s /usr/bin/vi /usr/bin/vim
 
 RUN curl --silent -Lo slackcat https://github.com/bcicen/slackcat/releases/download/v${SLACKCAT_VERSION}/slackcat-${SLACKCAT_VERSION}-$(uname -s)-amd64 \
-  && chmod +x ./slackcat \
+  && chmod +x slackcat \
+  && chown app:app slackcat \
   && mv slackcat /usr/local/bin/
 
 RUN S3CMD_CURRENT_VERSION=`curl --silent -fs https://api.github.com/repos/s3tools/s3cmd/releases/latest | grep tag_name | sed -E 's/.*"v?([0-9\.]+).*/\1/g'` \
@@ -40,7 +41,13 @@ RUN S3CMD_CURRENT_VERSION=`curl --silent -fs https://api.github.com/repos/s3tool
 
 RUN curl --silent -LO https://dl.min.io/client/mc/release/linux-amd64/mc \
   && chmod +x mc \
+  && chown app:app mc \
   && mv mc /usr/local/bin/
+
+RUN curl --silent -L https://github.com/fullstorydev/grpcurl/releases/download/v1.8.0/grpcurl_1.8.0_linux_x86_64.tar.gz | tar xz \
+  && chmod +x mc \
+  && chown app:app grpcurl \
+  && mv grpcurl /usr/local/bin/
 
 RUN curl --silent -Lo websocketd.deb https://github.com/joewalnes/websocketd/releases/download/v0.3.0/websocketd-0.3.0_amd64.deb \
   && dpkg -i websocketd.deb \
