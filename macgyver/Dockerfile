@@ -3,12 +3,14 @@ FROM python:3
 # Set the timezone to KST
 RUN cat /usr/share/zoneinfo/Asia/Seoul > /etc/localtime
 
+RUN useradd --user-group --system --create-home --no-log-init --uid 1000 --shell /bin/bash app
+
 ENV KUBERNETES_VERSION 1.18.2
 ENV SLACKCAT_VERSION 1.6
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
-  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc python-dateutil python-magic'; \
+  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc python-dateutil python-magic tmux'; \
   buildDeps=''; \
   apt-get update && apt-get install -y $runDeps $buildDeps --no-install-recommends; \
   rm -rf /var/lib/apt/lists/*; \
@@ -45,7 +47,7 @@ RUN curl --silent -LO https://dl.min.io/client/mc/release/linux-amd64/mc \
   && mv mc /usr/local/bin/
 
 RUN curl --silent -L https://github.com/fullstorydev/grpcurl/releases/download/v1.8.0/grpcurl_1.8.0_linux_x86_64.tar.gz | tar xz \
-  && chmod +x mc \
+  && chmod +x grpcurl \
   && chown app:app grpcurl \
   && mv grpcurl /usr/local/bin/
 
@@ -54,8 +56,6 @@ RUN curl --silent -Lo websocketd.deb https://github.com/joewalnes/websocketd/rel
   && rm websocketd.deb
 
 RUN pip install --upgrade pip
-
-RUN useradd --user-group --system --create-home --no-log-init --uid 1000 --shell /bin/bash app
 
 COPY requirements.txt /home/app/
 RUN chown -R app /home/app/
