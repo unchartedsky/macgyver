@@ -10,7 +10,7 @@ ENV SLACKCAT_VERSION 1.6
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
-  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc python-dateutil python-magic tmux'; \
+  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc python-dateutil python-magic tmux percona-toolkit'; \
   buildDeps=''; \
   apt-get update && apt-get install -y $runDeps $buildDeps --no-install-recommends; \
   rm -rf /var/lib/apt/lists/*; \
