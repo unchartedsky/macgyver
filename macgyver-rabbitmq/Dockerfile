@@ -1,4 +1,4 @@
-FROM docker.pkg.github.com/unchartedsky/macgyver/macgyver-java:latest
+FROM ghcr.io/unchartedsky/macgyver-java:latest
 
 USER root
 

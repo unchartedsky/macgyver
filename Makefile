@@ -6,7 +6,7 @@ export GIT_COMMIT_ID
 GIT_BRANCH=$(shell git describe --abbrev=1 --tags --always)
 export GIT_BRANCH
 
-REPO=docker.pkg.github.com/unchartedsky/macgyver
+REPO=ghcr.io/unchartedsky
 
 image:
 	@ for IMAGE in $(IMAGES) ; do \

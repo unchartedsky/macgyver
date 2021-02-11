@@ -10,7 +10,9 @@ ENV SLACKCAT_VERSION 1.6
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
-  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc python-dateutil python-magic tmux percona-toolkit'; \
+  echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list ; \
+  curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key | apt-key add - ; \
+  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc python-dateutil python-magic tmux percona-toolkit skopeo'; \
   buildDeps=''; \
   apt-get update && apt-get install -y $runDeps $buildDeps --no-install-recommends; \
   rm -rf /var/lib/apt/lists/*; \

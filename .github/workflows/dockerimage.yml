@@ -15,9 +15,9 @@ jobs:
     - uses: actions/checkout@master
     - uses: azure/docker-login@v1
       with:
-        login-server: docker.pkg.github.com
+        login-server: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ secrets.PAT_ANDROMEDARABBIT }}
     - name: Publish to Registry
       run: |
         make image
