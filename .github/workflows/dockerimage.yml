@@ -16,8 +16,8 @@ jobs:
     - uses: azure/docker-login@v1
       with:
         login-server: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.PAT_ANDROMEDARABBIT }}
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     - name: Publish to Registry
       run: |
         make image
