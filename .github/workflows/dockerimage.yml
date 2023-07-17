@@ -12,13 +12,85 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Set up base tags
+      id: set-up-base-tags
+      run: |
+        VERSION=edge
+        if [[ "${{ github.event_name }}" == "schedule" ]]; then
+          VERSION=nightly
+        elif [[ "${{ github.event_name }}" != "pull_request" ]]; then
+          VERSION=${GITHUB_REF#refs/heads/}
+        else
+          VERSION=${GITHUB_HEAD_REF}
+        fi
+        VERSION=$(echo "${VERSION}" | sed -r 's/\//_/g')
+        TAGS="${VERSION}"
+
+        if [[ "${VERSION}" == "master" ]]; then
+          TAGS="$TAGS,latest"
+        fi
+
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          TAGS="$TAGS,${GITHUB_REF#refs/tags/v}"
+        fi
+
+        SHORT_ID=$(echo ${GITHUB_SHA} | cut -c -7)
+        TAGS="$TAGS,sha-${SHORT_ID}"
+        if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+          TAGS="$TAGS,:latest"
+        fi
+        echo "tags=${TAGS}"
+        echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+
+    - name: Set up tags
+      id: set-up-tags
+      run: |
+        IFS=',' read -ra tags <<< "$TAGS"
+        TAG_COMMAND=""
+        for tag in "${tags[@]}"
+        do
+            MACGYVER_TAGS="ghcr.io/unchartedsky/macgyver:$tag"
+        done
+
+        echo "macgyver_tags=${MACGYVER_TAGS}"
+        echo "macgyver_tags=${MACGYVER_TAGS}" >> $GITHUB_OUTPUT
+      env:
+        TAGS: ${{ steps.set-up-base-tags.outputs.tags }}
+
     - uses: actions/checkout@master
-    - uses: azure/docker-login@v1
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
       with:
-        login-server: ghcr.io
+        platforms: 'arm64,amd64'
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      with:
+        install: true
+
+    - name: Test
+      run: |
+        set -x
+        docker version
+        cat /etc/docker/daemon.json
+        docker buildx version
+        docker buildx ls
+
+    - name: Login to Docker Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Publish to Registry
-      run: |
-        make image
-        make deploy
+
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      with:
+        context: "{{defaultContext}}:macgyver"
+        platforms: linux/amd64,linux/arm64
+        pull: true
+        push: true
+        tags: ${{ steps.set-up-tags.outputs.macgyver_tags }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max

@@ -11,7 +11,7 @@ REPO=ghcr.io/unchartedsky
 image:
 	@ for IMAGE in $(IMAGES) ; do \
 		echo Building $(REPO)/$${IMAGE}:$(GIT_COMMIT_ID) ; \
-		docker build -t $(REPO)/$${IMAGE}:$(GIT_COMMIT_ID) $${IMAGE} ; \
+		docker buildx build -t $(REPO)/$${IMAGE}:$(GIT_COMMIT_ID) $${IMAGE} ; \
 		docker tag $(REPO)/$${IMAGE}:$(GIT_COMMIT_ID) $(REPO)/$${IMAGE}:latest ; \
 	done
 
