@@ -1,18 +1,19 @@
 FROM python:3
 
+LABEL org.opencontainers.image.source = "https://github.com/unchartedsky/macgyver"
+
+SHELL ["/bin/bash", "-c"]
+
 # Set the timezone to KST
 RUN cat /usr/share/zoneinfo/Asia/Seoul > /etc/localtime
 
 RUN useradd --user-group --system --create-home --no-log-init --uid 1000 --shell /bin/bash app
 
-ENV KUBERNETES_VERSION 1.18.2
-ENV SLACKCAT_VERSION 1.6
+ENV SLACKCAT_VERSION 1.7.2
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
-  echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list ; \
-  curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key | apt-key add - ; \
-  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc python-dateutil python-magic tmux percona-toolkit skopeo ftp'; \
+  runDeps='curl ca-certificates procps netcat-traditional wget telnet default-mysql-client redis-tools vim-tiny groff s3curl dnsutils sipcalc tmux percona-toolkit ftp jq'; \
   buildDeps=''; \
   apt-get update && apt-get install -y $runDeps $buildDeps --no-install-recommends; \
   rm -rf /var/lib/apt/lists/*; \
@@ -20,13 +21,9 @@ RUN set -ex; \
   rm /var/log/dpkg.log /var/log/apt/*.log
 
 RUN set -ex; \
-  curl --silent -LO https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl; \
+  curl --silent -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"; \
   chmod +x ./kubectl; \
   mv ./kubectl /usr/local/bin/kubectl;
-
-RUN curl --silent -Lo jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 \
-  && chmod +x ./jq \
-  && mv jq /usr/local/bin/jq
 
 # Create a symbolic link for a user's convenience
 RUN /bin/ln -s /usr/bin/vi /usr/bin/vim
@@ -43,19 +40,19 @@ RUN S3CMD_CURRENT_VERSION=`curl --silent -fs https://api.github.com/repos/s3tool
   && ln -s $(find /opt/ -name s3cmd) /usr/local/bin/s3cmd \
   && ls /usr/local/bin/s3cmd
 
-RUN curl --silent -LO https://dl.min.io/client/mc/release/linux-amd64/mc \
-  && chmod +x mc \
-  && chown app:app mc \
-  && mv mc /usr/local/bin/
-
 RUN curl --silent -L https://github.com/fullstorydev/grpcurl/releases/download/v1.8.0/grpcurl_1.8.0_linux_x86_64.tar.gz | tar xz \
   && chmod +x grpcurl \
   && chown app:app grpcurl \
   && mv grpcurl /usr/local/bin/
 
-RUN curl --silent -Lo websocketd.deb https://github.com/joewalnes/websocketd/releases/download/v0.3.0/websocketd-0.3.0_amd64.deb \
-  && dpkg -i websocketd.deb \
-  && rm websocketd.deb
+RUN mkdir -p /tmp/websocketd \
+  && pushd /tmp/websocketd \
+  && curl --silent -Lo websocketd.zip https://github.com/joewalnes/websocketd/releases/download/v0.4.1/websocketd-0.4.1-linux_amd64.zip \
+  && unzip websocketd.zip \
+  && mv websocketd /usr/local/bin/ \
+  && chmod +x /usr/local/bin/websocketd \
+  && popd \
+  && rm -rf /tmp/websocketd
 
 RUN pip install --upgrade pip
 
