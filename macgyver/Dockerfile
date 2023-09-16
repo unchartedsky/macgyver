@@ -1,9 +1,15 @@
 FROM python:3
 
+LABEL org.opencontainers.image.source = "https://github.com/unchartedsky/macgyver"
+
+SHELL ["/bin/bash", "-c"]
+
+
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
+
 
 # Set the timezone to KST
 RUN cat /usr/share/zoneinfo/Asia/Seoul > /etc/localtime
@@ -16,7 +22,7 @@ RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
   echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list ; \
   curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key | apt-key add - ; \
-  runDeps='curl ca-certificates procps netcat-traditional wget telnet default-mysql-client redis-tools vim-tiny  groff s3curl dnsutils sipcalc tmux percona-toolkit skopeo ftp'; \
+  runDeps='curl ca-certificates procps netcat-traditional wget telnet default-mysql-client redis-tools vim-tiny  groff s3curl dnsutils sipcalc tmux percona-toolkit skopeo ftp jq'; \
   buildDeps=''; \
   apt-get update && apt-get install -y $runDeps $buildDeps --no-install-recommends; \
   rm -rf /var/lib/apt/lists/*; \
@@ -42,7 +48,7 @@ RUN curl --silent -Lo slackcat https://github.com/bcicen/slackcat/releases/downl
 
 RUN mkdir /tmp/grpcurl \
   && cd /tmp/grpcurl \
-  && curl --silent -L https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz \
+  && ( test "${TARGETARCH}" == "amd64" && (curl --silent -L "https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_${TARGETOS}_x86_64.tar.gz" | tar xz) || (curl --silent -L "https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_${TARGETOS}_${TARGETARCH}.tar.gz" | tar xz) ) \
   && chmod +x grpcurl \
   && chown app:app grpcurl \
   && mv grpcurl /usr/local/bin/ \

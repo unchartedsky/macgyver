@@ -1,5 +1,7 @@
 FROM ghcr.io/unchartedsky/macgyver-java:latest
 
+LABEL org.opencontainers.image.source = "https://github.com/unchartedsky/macgyver"
+
 USER root
 
 RUN mkdir -p /rabbitmq
