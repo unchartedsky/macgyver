@@ -1,18 +1,22 @@
 FROM python:3
 
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+
 # Set the timezone to KST
 RUN cat /usr/share/zoneinfo/Asia/Seoul > /etc/localtime
 
 RUN useradd --user-group --system --create-home --no-log-init --uid 1000 --shell /bin/bash app
 
-ENV KUBERNETES_VERSION 1.18.2
-ENV SLACKCAT_VERSION 1.6
+ENV SLACKCAT_VERSION 1.7.3
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
   echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list ; \
   curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key | apt-key add - ; \
-  runDeps='curl ca-certificates procps netcat wget telnet default-mysql-client redis-tools vim-tiny aws-shell groff s3curl dnsutils sipcalc python-dateutil python-magic tmux percona-toolkit skopeo ftp'; \
+  runDeps='curl ca-certificates procps netcat-traditional wget telnet default-mysql-client redis-tools vim-tiny  groff s3curl dnsutils sipcalc tmux percona-toolkit skopeo ftp'; \
   buildDeps=''; \
   apt-get update && apt-get install -y $runDeps $buildDeps --no-install-recommends; \
   rm -rf /var/lib/apt/lists/*; \
@@ -20,42 +24,40 @@ RUN set -ex; \
   rm /var/log/dpkg.log /var/log/apt/*.log
 
 RUN set -ex; \
-  curl --silent -LO https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl; \
+  curl --silent -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"; \
   chmod +x ./kubectl; \
   mv ./kubectl /usr/local/bin/kubectl;
 
-RUN curl --silent -Lo jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 \
+RUN curl --silent -Lo jq https://github.com/stedolan/jq/releases/download/jq-1.7/jq-${TARGETOS}-${TARGETARCH} \
   && chmod +x ./jq \
   && mv jq /usr/local/bin/jq
 
 # Create a symbolic link for a user's convenience
 RUN /bin/ln -s /usr/bin/vi /usr/bin/vim
 
-RUN curl --silent -Lo slackcat https://github.com/bcicen/slackcat/releases/download/v${SLACKCAT_VERSION}/slackcat-${SLACKCAT_VERSION}-$(uname -s)-amd64 \
+RUN curl --silent -Lo slackcat https://github.com/bcicen/slackcat/releases/download/v${SLACKCAT_VERSION}/slackcat-${SLACKCAT_VERSION}-$(uname -s)-${TARGETARCH} \
   && chmod +x slackcat \
   && chown app:app slackcat \
   && mv slackcat /usr/local/bin/
 
-RUN S3CMD_CURRENT_VERSION=`curl --silent -fs https://api.github.com/repos/s3tools/s3cmd/releases/latest | grep tag_name | sed -E 's/.*"v?([0-9\.]+).*/\1/g'` \
-  && mkdir -p /opt \
-  && wget --quiet https://github.com/s3tools/s3cmd/releases/download/v${S3CMD_CURRENT_VERSION}/s3cmd-${S3CMD_CURRENT_VERSION}.zip \
-  && unzip s3cmd-${S3CMD_CURRENT_VERSION}.zip -d /opt/ \
-  && ln -s $(find /opt/ -name s3cmd) /usr/local/bin/s3cmd \
-  && ls /usr/local/bin/s3cmd
-
-RUN curl --silent -LO https://dl.min.io/client/mc/release/linux-amd64/mc \
-  && chmod +x mc \
-  && chown app:app mc \
-  && mv mc /usr/local/bin/
-
-RUN curl --silent -L https://github.com/fullstorydev/grpcurl/releases/download/v1.8.0/grpcurl_1.8.0_linux_x86_64.tar.gz | tar xz \
+RUN mkdir /tmp/grpcurl \
+  && cd /tmp/grpcurl \
+  && curl --silent -L https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_${TARGETOS}_${TARGETARCH}.tar.gz | tar xz \
   && chmod +x grpcurl \
   && chown app:app grpcurl \
-  && mv grpcurl /usr/local/bin/
+  && mv grpcurl /usr/local/bin/ \
+  && rm -rf /tmp/grpcurl
 
-RUN curl --silent -Lo websocketd.deb https://github.com/joewalnes/websocketd/releases/download/v0.3.0/websocketd-0.3.0_amd64.deb \
-  && dpkg -i websocketd.deb \
-  && rm websocketd.deb
+RUN mkdir /tmp/websocketd \
+  && cd /tmp/websocketd \
+  && curl --silent -Lo websocketd.zip https://github.com/joewalnes/websocketd/releases/download/v0.4.1/websocketd-0.4.1-${TARGETOS}_${TARGETARCH}.zip \
+  && unzip websocketd.zip \
+  && mv websocketd /usr/local/bin/websocketd \
+  && chown app:app /usr/local/bin/websocketd \
+  && rm -rf /tmp/websocketd
+
+RUN curl https://rclone.org/install.sh | bash \
+  && chown app:app "$(which rclone)"
 
 RUN pip install --upgrade pip
 

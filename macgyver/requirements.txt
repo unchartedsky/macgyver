@@ -1,3 +1,6 @@
+aws-shell
+python-dateutil
+python-magic
 raven-bash
 awscli
 requests
