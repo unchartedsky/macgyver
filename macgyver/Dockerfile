@@ -70,6 +70,12 @@ RUN set -ex; \
   apt install ./ali_0.7.5_${TARGETOS}_${TARGETARCH}.deb; \
   rm -f ./ali_0.7.5_${TARGETOS}_${TARGETARCH}.deb;
 
+RUN set -ex; \
+  wget https://github.com/tsenart/vegeta/releases/download/v12.11.1/vegeta_12.11.1_${TARGETOS}_${TARGETARCH}.tar.gz; \
+  tar xvfz vegeta_12.11.1_${TARGETOS}_${TARGETARCH}.tar.gz; \
+  mv ./vegeta /usr/local/bin/; \
+  rm ./vegeta_12.11.1_${TARGETOS}_${TARGETARCH}.tar.gz;
+
 RUN pip install --upgrade pip
 
 COPY requirements.txt /home/app/
