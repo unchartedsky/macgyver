@@ -65,6 +65,11 @@ RUN mkdir /tmp/websocketd \
 RUN curl https://rclone.org/install.sh | bash \
   && chown app:app "$(which rclone)"
 
+RUN set -ex; \
+  wget https://github.com/nakabonne/ali/releases/download/v0.7.5/ali_0.7.5_${TARGETOS}_${TARGETARCH}.deb; \
+  apt install ./ali_0.7.5_${TARGETOS}_${TARGETARCH}.deb; \
+  rm -f ./ali_0.7.5_${TARGETOS}_${TARGETARCH}.deb;
+
 RUN pip install --upgrade pip
 
 COPY requirements.txt /home/app/
