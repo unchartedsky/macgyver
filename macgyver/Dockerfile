@@ -22,7 +22,7 @@ RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
   echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list ; \
   curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key | apt-key add - ; \
-  runDeps='curl ca-certificates procps netcat-traditional wget telnet default-mysql-client redis-tools vim-tiny groff s3curl dnsutils sipcalc tmux percona-toolkit skopeo ftp jq apache2-utils'; \
+  runDeps='curl ca-certificates procps netcat-traditional wget telnet default-mysql-client redis-tools vim-tiny  groff s3curl dnsutils sipcalc tmux percona-toolkit skopeo ftp jq apache2-utils'; \
   buildDeps=''; \
   apt-get update && apt-get install -y $runDeps $buildDeps --no-install-recommends; \
   rm -rf /var/lib/apt/lists/*; \
@@ -75,14 +75,6 @@ RUN set -ex; \
   tar xvfz vegeta_12.11.1_${TARGETOS}_${TARGETARCH}.tar.gz; \
   mv ./vegeta /usr/local/bin/; \
   rm ./vegeta_12.11.1_${TARGETOS}_${TARGETARCH}.tar.gz;
-
-RUN set -ex; \
-  gpg -k; \
-  gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69; \
-  echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | tee /etc/apt/sources.list.d/k6.list; \
-  apt-get update; \
-  apt-get install k6;
-
 
 RUN pip install --upgrade pip
 
