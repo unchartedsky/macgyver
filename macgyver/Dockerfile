@@ -1,4 +1,4 @@
-FROM python:3.14-bookworm
+FROM python:3.15-bookworm
 
 LABEL org.opencontainers.image.source = "https://github.com/unchartedsky/macgyver"
 
@@ -27,27 +27,34 @@ RUN set -ex; \
   apt-get purge -y --auto-remove $buildDeps; \
   rm /var/log/dpkg.log /var/log/apt/*.log
 
-# Install kubectl (multi-arch)
+# Install kubectl (multi-arch, 빌드 시점 최신 stable)
 RUN set -ex; \
   curl --silent -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/${TARGETOS}/${TARGETARCH}/kubectl"; \
   chmod +x ./kubectl; \
   mv ./kubectl /usr/local/bin/kubectl;
 
-RUN curl --silent -Lo jq https://github.com/stedolan/jq/releases/download/jq-1.7.1/jq-${TARGETOS}-${TARGETARCH} \
+# Install jq 1.8.2 (jqlang 에셋 명명: jq-linux-amd64 / jq-linux-arm64)
+RUN curl --silent -Lo jq https://github.com/jqlang/jq/releases/download/jq-1.8.2/jq-linux-${TARGETARCH} \
   && chmod +x ./jq \
   && mv jq /usr/local/bin/jq
 
 # Create a symbolic link for a user's convenience
 RUN /bin/ln -s /usr/bin/vi /usr/bin/vim
 
-RUN curl --silent -Lo slackcat https://github.com/bcicen/slackcat/releases/download/v${SLACKCAT_VERSION}/slackcat-${SLACKCAT_VERSION}-$(uname -s)-${TARGETARCH} \
-  && chmod +x slackcat \
-  && chown app:app slackcat \
-  && mv slackcat /usr/local/bin/
+# Install slackcat 1.7.3 — arm64 에셋이 존재하지 않아(2026-10 기준) amd64에서만 설치
+RUN set -ex; \
+  if [ "${TARGETARCH}" = "amd64" ]; then \
+    curl --silent -Lo /usr/local/bin/slackcat https://github.com/bcicen/slackcat/releases/download/v${SLACKCAT_VERSION}/slackcat-${SLACKCAT_VERSION}-linux-amd64; \
+    chmod +x /usr/local/bin/slackcat; \
+  fi
 
 RUN mkdir /tmp/grpcurl \
   && cd /tmp/grpcurl \
-  && ( test "${TARGETARCH}" == "amd64" && (curl --silent -L "https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_${TARGETOS}_x86_64.tar.gz" | tar xz) || (curl --silent -L "https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_${TARGETOS}_${TARGETARCH}.tar.gz" | tar xz) ) \
+  && case "${TARGETARCH}" in \
+       amd64) GRPCURL_ARCH="x86_64" ;; \
+       *) GRPCURL_ARCH="${TARGETARCH}" ;; \
+     esac \
+  && curl --silent -L "https://github.com/fullstorydev/grpcurl/releases/download/v1.9.4/grpcurl_1.9.4_${TARGETOS}_${GRPCURL_ARCH}.tar.gz" | tar xz \
   && chmod +x grpcurl \
   && chown app:app grpcurl \
   && mv grpcurl /usr/local/bin/ \
@@ -65,15 +72,15 @@ RUN curl https://rclone.org/install.sh | bash \
   && chown app:app "$(which rclone)"
 
 RUN set -ex; \
-  wget https://github.com/nakabonne/ali/releases/download/v0.7.5/ali_0.7.5_${TARGETOS}_${TARGETARCH}.deb; \
-  apt install ./ali_0.7.5_${TARGETOS}_${TARGETARCH}.deb; \
-  rm -f ./ali_0.7.5_${TARGETOS}_${TARGETARCH}.deb;
+  wget https://github.com/nakabonne/ali/releases/download/v0.8.0/ali_0.8.0_${TARGETOS}_${TARGETARCH}.deb; \
+  apt install ./ali_0.8.0_${TARGETOS}_${TARGETARCH}.deb; \
+  rm -f ./ali_0.8.0_${TARGETOS}_${TARGETARCH}.deb;
 
 RUN set -ex; \
-  wget https://github.com/tsenart/vegeta/releases/download/v12.11.1/vegeta_12.11.1_${TARGETOS}_${TARGETARCH}.tar.gz; \
-  tar xvfz vegeta_12.11.1_${TARGETOS}_${TARGETARCH}.tar.gz; \
+  wget https://github.com/tsenart/vegeta/releases/download/v12.13.0/vegeta_12.13.0_${TARGETOS}_${TARGETARCH}.tar.gz; \
+  tar xvfz vegeta_12.13.0_${TARGETOS}_${TARGETARCH}.tar.gz; \
   mv ./vegeta /usr/local/bin/; \
-  rm ./vegeta_12.11.1_${TARGETOS}_${TARGETARCH}.tar.gz;
+  rm ./vegeta_12.13.0_${TARGETOS}_${TARGETARCH}.tar.gz;
 
 RUN pip install --upgrade pip
 
