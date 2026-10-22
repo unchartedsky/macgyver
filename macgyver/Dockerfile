@@ -14,7 +14,6 @@ RUN cat /usr/share/zoneinfo/Asia/Seoul > /etc/localtime
 
 RUN useradd --user-group --system --create-home --no-log-init --uid 1000 --shell /bin/bash app
 
-ENV SLACKCAT_VERSION="1.7.3"
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
