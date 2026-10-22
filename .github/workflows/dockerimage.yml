@@ -1,11 +1,11 @@
-# macgyver 이미지 빌드 — master 푸시(macgyver/** 변경) 시 멀티아치 빌드해 GHCR로 푸시.
+# macgyver 이미지 빌드 — main 푸시(macgyver/** 변경) 시 멀티아치 빌드해 GHCR로 푸시.
 # 2023형 dockerimage.yml(무필터 푸시 트리거·복잡한 태그 스텝)을 dockers 레포 패턴으로 교체:
 # sha-<단축sha>+latest 태그, 실증된 액션 버전, 명시적 permissions.
 name: Dockerize
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths: ['macgyver/**', '.github/workflows/dockerimage.yml']
   workflow_dispatch:
 

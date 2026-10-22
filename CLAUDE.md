@@ -31,7 +31,7 @@ docker buildx build --platform linux/amd64,linux/arm64 macgyver/
 
 ## CI/CD
 
-`.github/workflows/dockerimage.yml` (Dockerize): master 브랜치 푸시 중 `macgyver/**` 또는 워크플로 파일 자체가 바뀔 때만 멀티아치(amd64+arm64) 빌드해 GHCR로 푸시한다. 태그는 `sha-<단축sha>`와 `latest` 두 개다. 캐시는 `type=gha`.
+`.github/workflows/dockerimage.yml` (Dockerize): main 브랜치 푸시 중 `macgyver/**` 또는 워크플로 파일 자체가 바뀔 때만 멀티아치(amd64+arm64) 빌드해 GHCR로 푸시한다. 태그는 `sha-<단축sha>`와 `latest` 두 개다. 캐시는 `type=gha`.
 
 ## Dockerfile 작업 시 주의점
 
