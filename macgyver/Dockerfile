@@ -14,7 +14,6 @@ RUN cat /usr/share/zoneinfo/Asia/Seoul > /etc/localtime
 
 RUN useradd --user-group --system --create-home --no-log-init --uid 1000 --shell /bin/bash app
 
-ENV SLACKCAT_VERSION="1.7.3"
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
@@ -40,13 +39,6 @@ RUN curl --silent -Lo jq https://github.com/jqlang/jq/releases/download/jq-1.8.2
 
 # Create a symbolic link for a user's convenience
 RUN /bin/ln -s /usr/bin/vi /usr/bin/vim
-
-# Install slackcat 1.7.3 — arm64 에셋이 존재하지 않아(2026-10 기준) amd64에서만 설치
-RUN set -ex; \
-  if [ "${TARGETARCH}" = "amd64" ]; then \
-    curl --silent -Lo /usr/local/bin/slackcat https://github.com/bcicen/slackcat/releases/download/v${SLACKCAT_VERSION}/slackcat-${SLACKCAT_VERSION}-linux-amd64; \
-    chmod +x /usr/local/bin/slackcat; \
-  fi
 
 RUN mkdir /tmp/grpcurl \
   && cd /tmp/grpcurl \
