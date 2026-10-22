@@ -1,4 +1,0 @@
-raven-bash
-awscli
-requests
-iredis

@@ -1,40 +1,39 @@
-FROM python:3
+FROM python:3.14-bookworm
 
 LABEL org.opencontainers.image.source = "https://github.com/unchartedsky/macgyver"
 
 SHELL ["/bin/bash", "-c"]
-
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
 
-
 # Set the timezone to KST
 RUN cat /usr/share/zoneinfo/Asia/Seoul > /etc/localtime
 
 RUN useradd --user-group --system --create-home --no-log-init --uid 1000 --shell /bin/bash app
 
-ENV SLACKCAT_VERSION 1.7.3
+ENV SLACKCAT_VERSION="1.7.3"
 
 RUN set -ex; \
   export DEBIAN_FRONTEND=noninteractive; \
-  echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list ; \
-  curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key | apt-key add - ; \
-  runDeps='curl ca-certificates procps netcat-traditional wget telnet default-mysql-client redis-tools vim-tiny  groff s3curl dnsutils sipcalc tmux percona-toolkit skopeo ftp jq apache2-utils'; \
-  buildDeps=''; \
+  curl -fsSL https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_12/Release.key | gpg --dearmor -o /usr/share/keyrings/libcontainers-archive-keyring.gpg; \
+  echo 'deb [signed-by=/usr/share/keyrings/libcontainers-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_12/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list; \
+  runDeps='curl ca-certificates procps netcat-traditional wget telnet default-mysql-client redis-tools vim-tiny groff s3curl dnsutils sipcalc tmux percona-toolkit ftp jq apache2-utils bc'; \
+  buildDeps='gnupg2'; \
   apt-get update && apt-get install -y $runDeps $buildDeps --no-install-recommends; \
   rm -rf /var/lib/apt/lists/*; \
   apt-get purge -y --auto-remove $buildDeps; \
   rm /var/log/dpkg.log /var/log/apt/*.log
 
+# Install kubectl (multi-arch)
 RUN set -ex; \
-  curl --silent -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"; \
+  curl --silent -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/${TARGETOS}/${TARGETARCH}/kubectl"; \
   chmod +x ./kubectl; \
   mv ./kubectl /usr/local/bin/kubectl;
 
-RUN curl --silent -Lo jq https://github.com/stedolan/jq/releases/download/jq-1.7/jq-${TARGETOS}-${TARGETARCH} \
+RUN curl --silent -Lo jq https://github.com/stedolan/jq/releases/download/jq-1.7.1/jq-${TARGETOS}-${TARGETARCH} \
   && chmod +x ./jq \
   && mv jq /usr/local/bin/jq
 
